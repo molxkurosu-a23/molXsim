@@ -281,6 +281,13 @@ canvas{
 @keyframes resultSparkle{from{opacity:.42;transform:scale(.98) rotate(-1deg)}to{opacity:1;transform:scale(1.035) rotate(1deg)}}
 .victoryCard{animation:resultCardGlow 1.15s ease-in-out infinite alternate}
 @keyframes resultCardGlow{from{box-shadow:0 18px 60px rgba(0,0,0,.42),0 0 10px rgba(255,210,70,.35)}to{box-shadow:0 18px 60px rgba(0,0,0,.42),0 0 34px rgba(255,220,80,.9),0 0 70px rgba(255,180,40,.42)}}
+#versusEliminationOverlay{position:fixed;inset:0;z-index:190;display:none;align-items:center;justify-content:center;background:rgba(25,20,12,.62);backdrop-filter:blur(3px);padding:14px}
+#versusEliminationOverlay.show{display:flex}
+#versusEliminationOverlay .failureCard{animation:resultCardGlow 1.15s ease-in-out infinite alternate}
+.vsElimName{font-weight:1000;font-size:clamp(30px,7vw,52px);line-height:1.05;letter-spacing:2px;color:#7c2818;text-shadow:2px 2px 0 #fff}
+.vsElimSub{margin:12px 0 18px;font-size:clamp(15px,2.7vw,21px);font-weight:900;color:#4d351d}
+.vsElimStats{font-size:15px;font-weight:800;color:#4d351d;margin-bottom:18px;line-height:1.7}
+@media(max-width:700px){#versusEliminationOverlay .failureCard{width:calc(100% - 14px);max-width:none}}
 @media(max-width:700px){
   .victoryCard,.failureCard{width:calc(100% - 14px);max-width:none}
   .resultHistory{grid-template-columns:1fr;max-height:32vh;gap:4px}
@@ -553,6 +560,53 @@ canvas{
 }
 </style>
 
+
+<style id="versus-mode-ui">
+#versusScorePanel{display:none;position:absolute;right:14px;top:14px;z-index:55;width:255px;padding:10px 12px;border:3px solid #5a3215;border-radius:15px;background:rgba(255,250,225,.94);box-shadow:0 5px 15px rgba(60,35,10,.25);display:none;color:#4d351d;pointer-events:none}
+#versusScorePanel.show{display:block}
+.vsHeader{display:flex;justify-content:space-between;align-items:center;font-weight:1000;font-size:16px;margin-bottom:6px}
+.vsRound{font-size:12px;color:#76542d}
+.vsTeamRow{display:grid;grid-template-columns:24px 1fr 55px;gap:5px;align-items:center;padding:4px 6px;margin:2px 0;border-radius:8px;font-weight:900}
+.vsTeamRow.active{background:#f5c96b;box-shadow:inset 0 0 0 2px #a94625}
+.vsTeamRow.eliminated,.vsLargeRow.eliminated{opacity:.48;text-decoration:line-through}
+.vsTeamRow .vsRank{font-size:12px;text-align:center}
+.vsTeamRow .vsName{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vsTeamRow .vsScore{text-align:right;font-size:17px}
+.vsTurnLabel{text-align:center;margin-top:6px;padding-top:6px;border-top:1px solid #c79a55;font-weight:1000;color:#a94625}
+#versusSettingsOverlay,#versusTurnOverlay,#versusFinalOverlay{position:absolute;inset:0;z-index:150;display:none;align-items:center;justify-content:center;background:rgba(25,20,10,.62);backdrop-filter:blur(3px);padding:14px}
+#versusSettingsOverlay.show,#versusTurnOverlay.show,#versusFinalOverlay.show{display:flex}
+.vsModal{width:min(620px,94vw);max-height:90vh;overflow:auto;padding:25px 22px 22px;border:5px solid #5a3215;border-radius:27px;background:linear-gradient(180deg,#fffbd4 0%,#f3d7a2 100%);box-shadow:0 20px 70px rgba(0,0,0,.45);color:#4d351d;text-align:center}
+.vsModal h2{margin:0 0 5px;font-size:clamp(27px,5vw,42px);color:#7b3b1d}
+.vsModalSub{font-size:13px;font-weight:800;color:#76542d;margin-bottom:17px}
+.vsSettingRow{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0;font-weight:900}
+.vsSettingRow select,.vsSettingRow input{font:inherit;border:2px solid #8a6336;border-radius:9px;padding:8px 10px;background:#fffdf0;color:#4d351d}
+.vsTeamInputs{margin:12px auto 18px;max-width:430px}
+.vsTeamInput{display:flex;align-items:center;gap:8px;margin:7px 0}
+.vsTeamInput span{width:30px;font-weight:1000}
+.vsTeamInput input{flex:1;width:100%;font:inherit;border:2px solid #8a6336;border-radius:9px;padding:9px 10px;background:#fffdf0;color:#4d351d}
+.vsModalButtons{display:flex;justify-content:center;gap:9px;flex-wrap:wrap}
+.vsModal button{border:3px solid #5a3215;border-radius:999px;padding:10px 22px;font-size:15px;font-weight:1000;cursor:pointer;background:#fff1bd;color:#5a3215;box-shadow:0 4px 0 #652a17}
+.vsModal button.primary{color:#fff;background:#a94625}
+.vsModal button:active{transform:translateY(3px);box-shadow:0 1px 0 #652a17}
+.vsScoresLarge{margin:12px auto 15px;max-width:430px}
+.vsLargeRow{display:grid;grid-template-columns:48px 1fr 85px;align-items:center;gap:8px;padding:8px 10px;margin:5px 0;border:2px solid rgba(109,59,25,.25);border-radius:11px;background:rgba(255,250,225,.78);font-weight:1000;text-align:left}
+.vsLargeRow.active{background:#f5c96b;border-color:#a94625}
+.vsLargeRow .num{text-align:center;color:#a94625}
+.vsLargeRow .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vsLargeRow .points{text-align:right;font-size:20px}
+.vsNext{font-size:20px;font-weight:1000;color:#a94625;margin:8px 0 15px}
+.vsFinalTitle{font-size:30px;font-weight:1000;color:#7b3b1d;margin-bottom:5px}
+.vsFinalSub{font-weight:900;color:#76542d;margin-bottom:13px}
+.vsFinalRow{display:grid;grid-template-columns:58px 1fr 90px;gap:8px;align-items:center;padding:10px;border-radius:11px;background:rgba(255,250,225,.8);border:2px solid rgba(109,59,25,.25);margin:6px 0;font-weight:1000;text-align:left}
+.vsFinalRow .rank{text-align:center;color:#a94625;font-size:19px}
+.vsFinalRow .points{text-align:right;font-size:19px}
+@media(max-width:700px){
+  #versusScorePanel{top:5px;right:5px;width:205px;padding:7px 8px;font-size:12px}
+  .vsHeader{font-size:13px}.vsTeamRow{padding:3px 4px}.vsTeamRow .vsScore{font-size:15px}
+  .vsModal{padding:21px 13px 18px;border-width:4px}
+  .vsModal h2{font-size:28px}.vsLargeRow{grid-template-columns:38px 1fr 68px;padding:7px}
+}
+</style>
 </head>
 <body>
 
@@ -568,11 +622,48 @@ canvas{
 
 <div id="message"></div>
 
+<div id="versusScorePanel">
+  <div class="vsHeader"><span>対人モード</span><span id="vsRoundLabel" class="vsRound">第1巡目</span></div>
+  <div id="vsScoreRows"></div>
+  <div id="vsTurnLabel" class="vsTurnLabel">Aチームの番</div>
+</div>
+
+<div id="versusSettingsOverlay" aria-hidden="true">
+  <div class="vsModal">
+    <h2>対人モード</h2>
+    <div class="vsModalSub">チーム数とチーム名を設定してください</div>
+    <div class="vsSettingRow"><label for="vsTeamCount">チーム数</label><select id="vsTeamCount"><option value="2">2チーム</option><option value="3">3チーム</option><option value="4">4チーム</option></select></div>
+    <div id="vsTeamInputs" class="vsTeamInputs"></div>
+    <div class="vsModalButtons"><button id="vsSettingsBack">戻る</button><button id="vsStartButton" class="primary">対人戦開始</button></div>
+  </div>
+</div>
+
+<div id="versusTurnOverlay" aria-hidden="true">
+  <div class="vsModal">
+    <h2 id="vsTurnTitle">Aチームの番</h2>
+    <div id="vsTurnSub" class="vsModalSub">スタートを押して投てきを開始</div>
+    <div id="vsTurnScores" class="vsScoresLarge"></div>
+    <div id="vsNextLabel" class="vsNext">Aチームの番</div>
+    <div class="vsModalButtons"><button id="vsTurnStartButton" class="primary">スタート</button></div>
+  </div>
+</div>
+
+<div id="versusFinalOverlay" aria-hidden="true">
+  <div class="vsModal">
+    <div class="vsFinalTitle">対人戦 結果</div>
+    <div class="vsFinalSub" id="vsFinalSub">50点到達！</div>
+    <div id="vsFinalScores"></div>
+    <div class="vsModalButtons"><button id="vsFinalHomeButton" class="primary">スタート画面へ</button></div>
+  </div>
+</div>
+
+
 <div id="startScreen" aria-hidden="false">
   <div class="startCard">
     <div class="startTitle">もるっくろす</div>
     <div class="startSub">MÖLKKY CROSS</div>
     <button id="startGameButton" class="startMainButton">ゲームスタート</button>
+    <button id="versusModeButton" class="startRankingButton">対人モード</button>
     <button id="openRankingButton" class="startRankingButton">ランキングを見る</button>
     <div class="startRankingBox">
       <div class="startRankingTitle">TOP 5</div>
@@ -615,6 +706,14 @@ canvas{
       <button id="failureRetryButton">もう一度挑戦</button>
       <button id="failureRankingButton">ランキングへ</button>
     </div>
+  </div>
+</div>
+
+<div id="versusEliminationOverlay" aria-hidden="true">
+  <div class="failureCard">
+    <div id="vsElimName" class="vsElimName">失格</div>
+    <div class="vsElimSub">3回連続0点で失格です</div>
+    <div id="vsElimStats" class="vsElimStats"></div>
   </div>
 </div>
 
@@ -865,6 +964,19 @@ let gaugeDirection = 1;
 let gaugeRunning = false;
 let matchPointTimer = null;
 
+/* ============================================================
+   対人モード状態
+   ============================================================ */
+let versusMode = false;
+let versusTeams = [];
+let versusTeamIndex = 0;
+let versusRound = 1;
+let versusTurnActive = false;
+let versusGameOver = false;
+let versusEliminationTimer = null;
+let versusBurstNextTimer = null;
+
+
 
 /* ============================================================
    画面・アニメーション
@@ -897,10 +1009,443 @@ function isMobileLayout(){
 
 
 /* ============================================================
+   対人モード
+   ============================================================ */
+
+function showVersusSettings(){
+    initVersusTeamInputs();
+    document.getElementById("versusSettingsOverlay").classList.add("show");
+    document.getElementById("versusSettingsOverlay").setAttribute("aria-hidden","false");
+}
+
+function hideVersusSettings(){
+    document.getElementById("versusSettingsOverlay").classList.remove("show");
+    document.getElementById("versusSettingsOverlay").setAttribute("aria-hidden","true");
+}
+
+function initVersusTeamInputs(){
+    const count = Number(document.getElementById("vsTeamCount").value || 2);
+    const wrap = document.getElementById("vsTeamInputs");
+    const defaults = ["Aチーム","Bチーム","Cチーム","Dチーム"];
+    const oldValues = Array.from(wrap.querySelectorAll("input")).map(x=>x.value);
+    wrap.innerHTML = "";
+    for(let i=0;i<count;i++){
+        const row = document.createElement("div");
+        row.className = "vsTeamInput";
+        const label = document.createElement("span");
+        label.textContent = String.fromCharCode(65+i);
+        const input = document.createElement("input");
+        input.type = "text";
+        input.maxLength = 20;
+        input.value = oldValues[i] || defaults[i];
+        input.dataset.vsTeamInput = "1";
+        row.appendChild(label);
+        row.appendChild(input);
+        wrap.appendChild(row);
+    }
+}
+
+function getVersusTeamNames(){
+    return Array.from(document.querySelectorAll("#vsTeamInputs input")).map((input,i)=>{
+        const v = input.value.trim();
+        return v || (String.fromCharCode(65+i)+"チーム");
+    });
+}
+
+function versusScoreRowsHtml(large=false){
+    if(!versusTeams.length) return "";
+    return versusTeams.map((team,i)=>{
+        const active = i===versusTeamIndex && !team.eliminated ? " active" : "";
+        const eliminated = team.eliminated ? " eliminated" : "";
+        const status = team.eliminated ? "失格" : team.score+"点";
+        if(large){
+            return '<div class="vsLargeRow'+active+eliminated+'"><span class="num">'+String.fromCharCode(65+i)+'</span><span class="name">'+escapeHtml(team.name)+'</span><span class="points">'+status+'</span></div>';
+        }
+        return '<div class="vsTeamRow'+active+eliminated+'"><span class="vsRank">'+String.fromCharCode(65+i)+'</span><span class="vsName">'+escapeHtml(team.name)+'</span><span class="vsScore">'+status+'</span></div>';
+    }).join("");
+}
+
+function escapeHtml(value){
+    return String(value).replace(/[&<>'"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[ch]));
+}
+
+function drawVersusScoreArea(L){
+    if(!versusMode || !versusTeams.length) return;
+
+    const x=20;
+    const y=L.infoY;
+    const width=Math.min(L.canvasWidth-40, 650);
+    const rowH=24;
+    const h=32+versusTeams.length*rowH;
+
+    ctx.save();
+    ctx.fillStyle="rgba(255,250,225,0.90)";
+    ctx.strokeStyle="#8a6336";
+    ctx.lineWidth=2;
+    ctx.fillRect(x,y-7,width,h);
+    ctx.strokeRect(x,y-7,width,h);
+
+    ctx.fillStyle="#4f3b20";
+    ctx.font="bold 17px Arial";
+    ctx.textAlign="left";
+    ctx.textBaseline="top";
+    ctx.fillText("対人戦スコア　・　第"+versusRound+"巡目",x+10,y);
+
+    versusTeams.forEach((team,i)=>{
+        const yy=y+20+i*rowH;
+        if(i===versusTeamIndex && !team.eliminated){
+            ctx.fillStyle="#f5c96b";
+            ctx.fillRect(x+6,yy-2,width-12,rowH-2);
+        }
+        ctx.fillStyle=team.eliminated ? "#9a8a78" : "#4d351d";
+        ctx.font="bold 14px Arial";
+        ctx.fillText(String.fromCharCode(65+i)+"　"+team.name, x+12, yy+3);
+        ctx.textAlign="right";
+        ctx.font="bold 17px Arial";
+        ctx.fillText(team.eliminated ? "失格" : team.score+"点", x+width-14, yy);
+        ctx.textAlign="left";
+    });
+    ctx.restore();
+}
+
+function renderVersusPanel(){
+    const panel=document.getElementById("versusScorePanel");
+    if(!panel) return;
+    if(!versusMode || !versusTeams.length){
+        panel.classList.remove("show");
+        return;
+    }
+    panel.classList.remove("show");
+    document.getElementById("vsRoundLabel").textContent="第"+versusRound+"巡目";
+    document.getElementById("vsScoreRows").innerHTML=versusScoreRowsHtml(false);
+    document.getElementById("vsTurnLabel").textContent=versusTeams[versusTeamIndex].name+"の番";
+}
+
+function showVersusTurnOverlay(result=false){
+    if(!versusMode || versusGameOver) return;
+    const team=versusTeams[versusTeamIndex];
+    document.getElementById("vsTurnTitle").textContent=result ? "投擲結果" : team.name+"の番";
+    document.getElementById("vsTurnSub").textContent=result ? "現在の合計得点" : "スタートを押して投てきを開始";
+    document.getElementById("vsTurnScores").innerHTML=versusScoreRowsHtml(true);
+    document.getElementById("vsNextLabel").textContent=team.name+"の番";
+    document.getElementById("vsTurnStartButton").textContent="スタート";
+    document.getElementById("versusTurnOverlay").classList.add("show");
+    document.getElementById("versusTurnOverlay").setAttribute("aria-hidden","false");
+    renderVersusPanel();
+}
+
+function hideVersusTurnOverlay(){
+    document.getElementById("versusTurnOverlay").classList.remove("show");
+    document.getElementById("versusTurnOverlay").setAttribute("aria-hidden","true");
+}
+
+function prepareVersusTurn(){
+    hideBreakEffect();
+    hideBurstEffect();
+    hideMatchPointBanner();
+    throwing=false;
+    gaugeRunning=false;
+    aimConfirmed=false;
+    gaugeValue=0;
+    gaugeDirection=1;
+    score=versusTeams[versusTeamIndex].score;
+    resetBall();
+    /* 対人モードではピンを再生成しない。
+       投擲後に起こしたピンの現在座標を、そのまま次の投擲へ引き継ぐ。 */
+    messageBox.textContent="";
+    renderVersusPanel();
+    drawTopView();
+}
+
+function startVersusGame(){
+    /* 再戦時に前試合の状態・タイマーを完全に切る */
+    if(versusEliminationTimer){clearTimeout(versusEliminationTimer);versusEliminationTimer=null;}
+    if(versusBurstNextTimer){clearTimeout(versusBurstNextTimer);versusBurstNextTimer=null;}
+    const names=getVersusTeamNames();
+    versusTeams=names.map(name=>({name:name,score:0,zeroCount:0,eliminated:false}));
+    versusTeamIndex=0;
+    versusRound=1;
+    versusTurnActive=false;
+    versusGameOver=false;
+    gameOver=false;
+    throwing=false;
+    gaugeRunning=false;
+    hideVersusFinal();
+    hideVersusElimination();
+    hideVersusTurnOverlay();
+    versusMode=true;
+    score=0;
+    throwCount=0;
+    throwHistory=[];
+    zeroCount=0;
+    hideVersusSettings();
+    hideStartScreen();
+    hideVictoryScreen();
+    hideFailureScreen();
+    /* 試合開始時だけ初期配置を作る。以後の投擲では再生成しない。 */
+    createPins();
+    prepareVersusTurn();
+    showVersusTurnOverlay(false);
+}
+
+function activeVersusTeams(){
+    return versusTeams.filter(t=>!t.eliminated);
+}
+
+function findNextVersusTeam(){
+    if(!versusTeams.length) return -1;
+    for(let step=1; step<=versusTeams.length; step++){
+        const idx=(versusTeamIndex+step)%versusTeams.length;
+        if(!versusTeams[idx].eliminated) return idx;
+    }
+    return -1;
+}
+
+function showVersusElimination(team){
+    const overlay=document.getElementById("versusEliminationOverlay");
+    document.getElementById("vsElimName").textContent=team.name+"　失格";
+    document.getElementById("vsElimStats").textContent=team.score+"点　・　3回連続0点";
+    overlay.classList.remove("show");
+    void overlay.offsetWidth;
+    overlay.classList.add("show");
+    overlay.setAttribute("aria-hidden","false");
+    playGameOverSound();
+    vibrate([220,70,220,70,320]);
+}
+
+function hideVersusElimination(){
+    if(versusEliminationTimer){clearTimeout(versusEliminationTimer);versusEliminationTimer=null;}
+    const overlay=document.getElementById("versusEliminationOverlay");
+    if(overlay){overlay.classList.remove("show");overlay.setAttribute("aria-hidden","true");}
+}
+
+function resetVersusFallenPins(){
+    for(const pin of pins){
+        if(pin.fallen){
+            pin.fallen=false;
+            pin.vx=0.0;
+            pin.vy=0.0;
+        }
+    }
+}
+
+function continueAfterVersusElimination(){
+    hideVersusElimination();
+    const active=activeVersusTeams();
+    if(active.length<=1){
+        finishVersusGame("最後まで残ったチームが決定");
+        return;
+    }
+    const next=findNextVersusTeam();
+    if(next<0){
+        finishVersusGame("対戦終了");
+        return;
+    }
+    /* 失格した投擲でも、ピンは起こした状態の現在座標をそのまま引き継ぐ。
+       createPins() や初期配置への復元は行わない。 */
+    versusTeamIndex=next;
+    score=versusTeams[versusTeamIndex].score;
+    prepareVersusTurn();
+    renderVersusPanel();
+    drawTopView();
+    setTimeout(()=>showVersusTurnOverlay(true),250);
+}
+
+function finishVersusGame(reason){
+    versusGameOver=true;
+    versusTurnActive=false;
+    gameOver=true;
+    throwing=false;
+    gaugeRunning=false;
+    const sorted=versusTeams.map((t,i)=>({name:t.name,score:t.score,index:i})).sort((a,b)=>b.score-a.score || a.index-b.index);
+    document.getElementById("vsFinalScores").innerHTML=sorted.map((t,i)=>{
+        const rank=i+1;
+        return '<div class="vsFinalRow"><span class="rank">'+rank+'位</span><span>'+escapeHtml(t.name)+'</span><span class="points">'+t.score+'点</span></div>';
+    }).join("");
+    const winner=versusTeams.find(t=>t.score===50) || activeVersusTeams().sort((a,b)=>b.score-a.score)[0] || versusTeams[versusTeamIndex];
+    document.getElementById("vsFinalSub").textContent=reason || (winner.name+"が50点に到達！");
+    hideVersusTurnOverlay();
+    renderVersusPanel();
+    playVictorySound();
+    vibrate([80,50,120,50,180,50,260]);
+    document.getElementById("versusFinalOverlay").classList.add("show");
+    document.getElementById("versusFinalOverlay").setAttribute("aria-hidden","false");
+}
+
+function hideVersusFinal(){
+    document.getElementById("versusFinalOverlay").classList.remove("show");
+    document.getElementById("versusFinalOverlay").setAttribute("aria-hidden","true");
+}
+
+function exitVersusMode(){
+    if(versusBurstNextTimer){clearTimeout(versusBurstNextTimer);versusBurstNextTimer=null;}
+    hideVersusFinal();
+    hideVersusElimination();
+    hideVersusTurnOverlay();
+    hideVersusSettings();
+    versusMode=false;
+    versusTeams=[];
+    versusTurnActive=false;
+    versusGameOver=false;
+    renderVersusPanel();
+}
+
+function advanceVersusTurn(){
+    if(versusGameOver) return;
+
+    const next=findNextVersusTeam();
+    if(next<0){
+        finishVersusGame("対戦終了");
+        return;
+    }
+    if(next<versusTeamIndex) versusRound++;
+
+    // 対人モードでは試合終了までピン配置を保持する。
+    // 前チームで倒れたピンは次チームのターンでもそのまま残す。
+    versusTeamIndex=next;
+    score=versusTeams[versusTeamIndex].score;
+    renderVersusPanel();
+    drawTopView();
+    setTimeout(()=>showVersusTurnOverlay(true),250);
+}
+
+function finishVersusThrow(gainedScore, didBreak=false){
+    const team=versusTeams[versusTeamIndex];
+    let newScore=team.score+gainedScore;
+    const didBurst=newScore>50;
+    if(didBurst) newScore=25;
+    team.score=newScore;
+    score=team.score;
+
+    if(gainedScore===0){
+        team.zeroCount += 1;
+        playZeroSound();
+        vibrate([80,40,80]);
+    }else{
+        team.zeroCount = 0;
+        if(!didBurst) playScoreSound();
+        vibrate(35);
+    }
+
+    if(didBurst){
+        messageBox.textContent="バースト！ 50点を超えたため25点に戻りました。";
+        showBurstEffect();
+    }
+
+    /* 投擲後は倒れたピンを起こすが、座標は現在位置のまま維持 */
+    resetVersusFallenPins();
+    resetBall();
+    aimConfirmed=false;
+    gaugeValue=0;
+    gaugeDirection=1;
+    gaugeRunning=false;
+    throwing=false;
+    versusTurnActive=false;
+
+    if(team.score===50){
+        drawTopView();
+        finishVersusGame(team.name+"が50点に到達！");
+        return;
+    }
+
+    if(team.zeroCount>=3){
+        team.eliminated=true;
+        drawTopView();
+        showVersusElimination(team);
+        versusEliminationTimer=setTimeout(continueAfterVersusElimination,2200);
+        return;
+    }
+
+    /* BREAK演出は次チームのスタート表示前に完了させる */
+    let effectWait = 0;
+    if(didBreak) effectWait = Math.max(effectWait, 4250);
+    if(didBurst) effectWait = Math.max(effectWait, 5550);
+
+    if(effectWait > 0){
+        if(versusBurstNextTimer) clearTimeout(versusBurstNextTimer);
+        versusBurstNextTimer=setTimeout(()=>{
+            versusBurstNextTimer=null;
+            advanceVersusTurn();
+        },effectWait);
+        drawTopView();
+        return;
+    }
+
+    advanceVersusTurn();
+}
+
+function startVersusTurn(){
+    if(!versusMode || versusGameOver || versusTurnActive || throwing) return;
+    versusTurnActive=true;
+    hideVersusTurnOverlay();
+    score=versusTeams[versusTeamIndex].score;
+
+    /* 38～49点なら、次の投擲開始時に「あと少し！」を表示。
+       演出中もversusTurnActive=trueなので、そのまま投擲できる。 */
+    if(score >= 38 && score < 50){
+        playMatchPointSound();
+        showMatchPointBanner();
+        messageBox.textContent = "あと1本で50点！ 「" + (50 - score) + "」番を狙え！";
+    }else{
+        hideMatchPointBanner();
+    }
+
+    aimConfirmed=false;
+    gaugeRunning=false;
+    gaugeValue=0;
+    gaugeDirection=1;
+    messageBox.textContent="";
+    renderVersusPanel();
+    drawTopView();
+}
+
+/* ============================================================
    ランキング
    ============================================================ */
 
 const RANKING_KEY = "molkky_ranking";
+
+// Googleフォーム連携設定
+// ゲーム終了時に、現在のランキング記録をGoogleフォームへ自動送信します。
+const GOOGLE_FORM_RESPONSE_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeD36tLvjJsaNsYLOQqdf5QzuufAZoPiORKI5qG0OEmpya4QA/formResponse";
+const GOOGLE_FORM_ENTRY = {
+    dateTime: "entry.1628669547", // 取得日時
+    name: "entry.515266856",       // 氏名
+    throws: "entry.836809895",     // 投擲数
+    firstScore: "entry.519914744", // 1投目の得点
+    finalScore: "entry.465038731"  // 最終得点
+};
+
+function submitRankingToGoogleForm(record){
+    try{
+        const firstScore = record.history && record.history.length > 0
+            ? Number(record.history[0].points || 0)
+            : 0;
+
+        const params = new URLSearchParams();
+        params.append(GOOGLE_FORM_ENTRY.dateTime, record.dateTime || "");
+        params.append(GOOGLE_FORM_ENTRY.name, record.name || "名無し");
+        params.append(GOOGLE_FORM_ENTRY.throws, String(Number(record.throws || 0)));
+        params.append(GOOGLE_FORM_ENTRY.firstScore, String(firstScore));
+        params.append(GOOGLE_FORM_ENTRY.finalScore, String(Number(record.score || 0)));
+
+        // Googleフォームはクロスオリジンのため no-cors で送信します。
+        // 送信結果そのものはブラウザから読み取れませんが、フォームへの登録は行われます。
+        fetch(GOOGLE_FORM_RESPONSE_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+            },
+            body: params.toString(),
+            keepalive: true
+        }).catch(err=>{
+            console.warn("Googleフォームへのランキング送信に失敗しました。", err);
+        });
+    }catch(e){
+        console.warn("Googleフォームへのランキング送信処理でエラーが発生しました。", e);
+    }
+}
 
 function makeRankingId(){
     return "r_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2,8);
@@ -962,6 +1507,10 @@ function saveRanking(){
     saveRankingFile();
     renderStartRanking();
     renderRankingList();
+
+    // Googleフォームにも同じ記録を自動登録
+    submitRankingToGoogleForm(record);
+
     return record;
 }
 
@@ -1154,6 +1703,25 @@ function createPins(){
 
 function clearCanvas(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
+}
+
+function drawVersusDesktopScoreArea(){
+    const x=850,y=18,w=235,h=170;
+    ctx.fillStyle="rgba(255,250,225,0.90)";
+    ctx.strokeStyle="#8a6336";
+    ctx.lineWidth=2;
+    ctx.fillRect(x,y,w,h); ctx.strokeRect(x,y,w,h);
+    ctx.fillStyle="#4f3b20"; ctx.font="bold 16px Arial"; ctx.textAlign="left"; ctx.textBaseline="top";
+    ctx.fillText("対人戦スコア",x+15,y+10);
+    ctx.font="11px Arial"; ctx.fillStyle="#76542d";
+    ctx.fillText("第"+versusRound+"巡目",x+150,y+12);
+    versusTeams.forEach((team,i)=>{
+        const yy=y+38+i*30;
+        if(i===versusTeamIndex && !team.eliminated){ctx.fillStyle="#f5c96b";ctx.fillRect(x+7,yy-2,w-14,26);}
+        ctx.fillStyle=team.eliminated?"#9a8a78":"#4d351d";
+        ctx.font="bold 13px Arial"; ctx.fillText(String.fromCharCode(65+i)+"　"+team.name,x+12,yy+3);
+        ctx.textAlign="right"; ctx.font="bold 16px Arial"; ctx.fillText(team.eliminated?"失格":team.score+"点",x+w-13,yy+2); ctx.textAlign="left";
+    });
 }
 
 function drawGameInfo(){
@@ -1394,6 +1962,7 @@ function drawMobileTopView(){
     const L = MOBILE_LAYOUT;
     clearCanvas();
     drawMolkkyBackdrop(L);
+    renderVersusPanel();
 
     ctx.fillStyle = "#4f3b20";
     ctx.font = "bold 20px Arial";
@@ -1498,22 +2067,28 @@ function drawMobileTopView(){
     ctx.textAlign="center"; ctx.fillText(targetDistance.toFixed(2)+" m",center,L.gaugeY+42);
     ctx.textAlign="right"; ctx.fillText(maxDistance.toFixed(2)+" m",L.gaugeRight,L.gaugeY+42);
 
-    /* スコア */
-    ctx.fillStyle="#111"; ctx.font="bold 17px Arial"; ctx.textAlign="left"; ctx.textBaseline="top";
-    ctx.fillText("スコア："+score,20,L.infoY);
-    ctx.font="13px Arial";
-    ctx.fillText("投てき："+throwCount+"回　　ターン："+turn,20,L.infoY+28);
-    ctx.fillText("連続0点："+zeroCount+" / 3",20,L.infoY+50);
-
-    /* ランキング */
-    ctx.font="bold 16px Arial"; ctx.fillText("スコアランキング",210,L.infoY);
-    ctx.font="11px Arial";
-    if(!ranking.length){
-        ctx.fillText("まだ記録がありません",210,L.infoY+28);
+    /* スコア表示：対人戦はゲージ直下の個人スコア欄を使用 */
+    if(versusMode){
+        drawVersusScoreArea(L);
     }else{
-        for(let i=0;i<Math.min(3,ranking.length);i++){
-            const r=ranking[i];
-            ctx.fillText((i+1)+"位 "+String(r.name)+"  "+Number(r.score)+"点（"+Number(r.throws)+"投）",210,L.infoY+28+i*22);
+        ctx.fillStyle="#111"; ctx.font="bold 17px Arial"; ctx.textAlign="left"; ctx.textBaseline="top";
+        ctx.fillText("スコア："+score,20,L.infoY);
+        ctx.font="13px Arial";
+        ctx.fillText("投てき："+throwCount+"回　　ターン："+turn,20,L.infoY+28);
+        ctx.fillText("連続0点："+zeroCount+" / 3",20,L.infoY+50);
+    }
+
+    /* ランキング：対人モードでは表示しない */
+    if(!versusMode){
+        ctx.font="bold 16px Arial"; ctx.fillText("スコアランキング",210,L.infoY);
+        ctx.font="11px Arial";
+        if(!ranking.length){
+            ctx.fillText("まだ記録がありません",210,L.infoY+28);
+        }else{
+            for(let i=0;i<Math.min(3,ranking.length);i++){
+                const r=ranking[i];
+                ctx.fillText((i+1)+"位 "+String(r.name)+"  "+Number(r.score)+"点（"+Number(r.throws)+"投）",210,L.infoY+28+i*22);
+            }
         }
     }
 
@@ -1532,6 +2107,7 @@ function drawTopView(){
     }
 
     clearCanvas();
+    renderVersusPanel();
 
     /* モルックらしい屋外フィールド */
     ctx.fillStyle = "rgba(225,239,202,0.18)";
@@ -1735,8 +2311,12 @@ function drawTopView(){
         );
     }
 
-    drawGameInfo();
-    drawRanking();
+    if(versusMode){
+        drawVersusDesktopScoreArea();
+    }else{
+        drawGameInfo();
+        drawRanking();
+    }
     drawDistanceGauge();
 }
 
@@ -2379,6 +2959,11 @@ function finishThrow(){
             fallenCount;
     }
 
+    if(versusMode){
+        finishVersusThrow(gainedScore, didBreak);
+        return;
+    }
+
     score += gainedScore;
 
     const didBurst = score > 50;
@@ -2733,6 +3318,10 @@ function showSavedRankingResult(id){
 
 function newGame(){
 
+    if(versusMode){
+        exitVersusMode();
+    }
+
     hideBreakEffect();
     hideBurstEffect();
     hideVictoryScreen();
@@ -2870,6 +3459,27 @@ document.getElementById(
     "click",
     clearRanking
 );
+
+document.getElementById("versusModeButton").addEventListener("click", () => {
+    initAudio();
+    showVersusSettings();
+});
+
+document.getElementById("vsTeamCount").addEventListener("change", initVersusTeamInputs);
+document.getElementById("vsSettingsBack").addEventListener("click", hideVersusSettings);
+document.getElementById("vsStartButton").addEventListener("click", () => {
+    initAudio();
+    startVersusGame();
+});
+document.getElementById("vsTurnStartButton").addEventListener("click", () => {
+    initAudio();
+    startVersusTurn();
+});
+document.getElementById("vsFinalHomeButton").addEventListener("click", () => {
+    initAudio();
+    exitVersusMode();
+    showStartScreen();
+});
 
 document.getElementById("startGameButton").addEventListener("click", () => {
     initAudio();
