@@ -27,44 +27,11 @@ button:hover{background:#ddd}
 
 @media(max-width:700px){
   body{background:#dcebcf;overflow-x:hidden}
-  /* 端末のアスペクト比に合わせてゲーム本体を縮尺。内部座標は変更しない。 */
-  #app{
-    width:100%;
-    max-width:390px;
-    height:auto;
-    min-height:0;
-    margin:0 auto;
-    background:#eef5df;
-    border-width:0;
-    border-radius:0;
-  }
-  canvas{
-    display:block;
-    width:100%;
-    height:auto;
-    aspect-ratio:390 / 950;
-    background:transparent;
-  }
-  #buttons{
-    position:static;
-    width:100%;
-    padding:10px 8px 6px;
-    display:grid;
-    grid-template-columns:1fr 1fr 1.25fr;
-    gap:7px;
-  }
+  #app{width:100%;height:auto;min-height:100vh;margin:0;background:#eef5df;border-width:0;border-radius:0}
+  canvas{width:100%;height:auto;aspect-ratio:390 / 760;background:transparent}
+  #buttons{position:static;width:100%;padding:10px 8px 6px;display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:7px}
   button{font-size:14px;min-height:46px;padding:8px 4px}
   #message{position:static;width:auto;min-height:0;padding:8px 12px 12px;text-align:center;font-size:13px;background:rgba(255,250,225,.92);border:0;border-radius:0;box-shadow:none}
-}
-
-/* 極端に横長・縦長の古い端末でもゲーム幅を端末幅に合わせる */
-@media(max-width:360px){
-  #app{max-width:100vw}
-  button{font-size:13px;min-height:44px}
-}
-
-@media(min-width:701px) and (max-height:760px){
-  #app{transform:scale(min(1, calc((100vh - 20px) / 760))); transform-origin:top center; margin-bottom:calc((760px * min(1, calc((100vh - 20px) / 760))) - 760px);}
 }
 
 @media(min-width:701px) and (max-width:1120px){
@@ -2211,48 +2178,43 @@ function updateFallenPins(dt){
         const halfWidth =
             FIELD_WIDTH / 2;
 
-        /*
-         * 枠外へ飛び出したピンは、その「出た位置」から
-         * フィールド内側へ1m戻して再配置する。
-         * これまでのように枠位置で止めるのではなく、
-         * いったん外へ出た位置を基準に1m戻す。
-         */
-        const REPOSITION_INWARD_DISTANCE = 1.0;
-        let repositioned = false;
+        if(
+            pin.x <
+            -halfWidth + PIN_RADIUS
+        ){
 
-        if(pin.x < -halfWidth){
-            pin.x += REPOSITION_INWARD_DISTANCE;
+            pin.x =
+                -halfWidth + PIN_RADIUS;
+
             pin.vx = 0.0;
-            repositioned = true;
         }
 
-        if(pin.x > halfWidth){
-            pin.x -= REPOSITION_INWARD_DISTANCE;
+        if(
+            pin.x >
+            halfWidth - PIN_RADIUS
+        ){
+
+            pin.x =
+                halfWidth - PIN_RADIUS;
+
             pin.vx = 0.0;
-            repositioned = true;
         }
 
-        if(pin.y < 0.0){
-            pin.y += REPOSITION_INWARD_DISTANCE;
+        if(pin.y < PIN_RADIUS){
+
+            pin.y = PIN_RADIUS;
             pin.vy = 0.0;
-            repositioned = true;
         }
 
-        if(pin.y > FIELD_LENGTH){
-            pin.y -= REPOSITION_INWARD_DISTANCE;
+        if(
+            pin.y >
+            FIELD_LENGTH - PIN_RADIUS
+        ){
+
+            pin.y =
+                FIELD_LENGTH - PIN_RADIUS;
+
             pin.vy = 0.0;
-            repositioned = true;
-        }
-
-        if(repositioned){
-            /* 再配置後の物理位置を表示位置へ反映 */
-            pin.displayX =
-                pin.baseDisplayX +
-                (pin.x - pin.basePhysicsX) / PIN_PHYSICS_LAYOUT_SCALE;
-
-            pin.displayY =
-                pin.baseDisplayY +
-                (pin.y - pin.basePhysicsY) / PIN_PHYSICS_LAYOUT_SCALE;
         }
 
         const speed =
